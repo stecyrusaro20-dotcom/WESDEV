@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Search — MiniGoogle (Demo)</title>
+  <meta name="description" content="A professional single-file demo that mimics a clean search homepage like Google. Accessible, responsive and easy to extend." />
+
+  <style>
+    /* ===== Reset & base ===== */
+    :root{
+      --bg: #ffffff;
+      --panel: #f8f9fa;
+      --accent: #1a73e8;
+      --muted: #5f6368;
+      --shadow: 0 6px 18px rgba(60,64,67,0.12);
+      --radius: 24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#ffffff 0%, #fafafa 100%);
+      color:#202124;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      padding:40px 20px;
+    }
+
+    /* ===== Layout ===== */
+    .stage{
+      width:100%;
+      max-width:980px;
+      text-align:center;
+    }
+
+    /* Logo */
+    .logo{
+      display:inline-block;
+      margin-bottom:28px;
+      user-select:none;
+    }
+    .logo svg{height:68px;width:auto;display:block}
+
+    /* Search panel */
+    .search-panel{
+      background:var(--panel);
+      border-radius:28px;
+      padding:18px 22px;
+      box-shadow:var(--shadow);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      max-width:760px;
+      margin:0 auto;
+      position:relative;
+    }
+
+    .search-input{
+      flex:1;
+      border:0;
+      outline:none;
+      font-size:18px;
+      background:transparent;
+      padding:10px 6px;
+    }
+
+    .icon-btn{
+      background:transparent;
+      border:0;
+      cursor:pointer;
+      padding:6px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
+    }
+    .icon-btn:focus{box-shadow:0 0 0 3px rgba(26,115,232,0.18)}
+
+    /* Buttons */
+    .actions{
+      margin-top:20px;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+    }
+    .btn{
+      background:transparent;
+      border:1px solid #e4e6e8;
+      padding:10px 16px;
+      border-radius:6px;
+      font-size:14px;
+      cursor:pointer;
+    }
+    .btn.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:var(--accent);
+      box-shadow:0 4px 12px rgba(26,115,232,0.18);
+    }
+
+    /* Suggestions dropdown */
+    .suggestions{
+      position:absolute;
+      left:22px; right:22px; top:100%;
+      margin-top:8px;
+      background:white;
+      border-radius:12px;
+      box-shadow:0 12px 30px rgba(32,33,36,0.12);
+      overflow:hidden;
+      max-height:320px;
+      display:none;
+    }
+    .suggestions.open{display:block}
+    .suggestion-item{
+      padding:10px 14px;
+      text-align:left;
+      font-size:15px;
+      cursor:pointer;\    }
+    .suggestion-item:hover, .suggestion-item[aria-selected="true"]{
+      background:#f1f3f4;
+    }
+
+    /* Footer */
+    .footer{
+      margin-top:48px;
+      color:var(--muted);
+      font-size:13px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    /* Responsive */
+    @media (max-width:520px){
+      .logo svg{height:54px}
+      .search-panel{padding:12px}
+      .search-input{font-size:16px}
+    }
+
+  </style>
+</head>
+<body>
+  <main class="stage" role="main">
+
+    <!-- Logo: kept as inline SVG so the page is single-file and fast -->
+    <div class="logo" aria-hidden="false">
+      <!-- A clean, colorful wordmark — inspired by Google's palette but different to avoid trademark issues -->
+      <svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MiniSearch logo">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#1a73e8" />
+            <stop offset="1" stop-color="#0b57d0" />
+          </linearGradient>
+        </defs>
+        <text x="0" y="40" font-family="Inter, Roboto, Arial" font-size="40" font-weight="600" fill="url(#g1)">Mini</text>
+        <text x="100" y="40" font-family="Inter, Roboto, Arial" font-size="40" font-weight="600" fill="#34a853">Search</text>
+      </svg>
+    </div>
+
+    <!-- Search form: action points to Google so submitting performs a real web search. Change 'action' if you want a self-hosted results page. -->
+    <form class="search-panel" action="https://www.google.com/search" method="GET" role="search" aria-label="Search the web">
+
+      <button type="button" class="icon-btn" title="Search icon" aria-hidden="true">
+        <!-- magnifier icon -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M15.5 15.5L21 21" stroke="#5f6368" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="11" cy="11" r="6" stroke="#5f6368" stroke-width="1.5" />
+        </svg>
+      </button>
+
+      <label for="q" class="sr-only">Search query</label>
+      <input id="q" name="q" type="search" class="search-input" autocomplete="off" placeholder="Search the web or type a URL" aria-label="Search" spellcheck="false" />
+
+      <button id="voiceBtn" type="button" class="icon-btn" title="Voice search (demo)" aria-label="Voice search">
+        <!-- simple mic icon (non-functional demo) -->
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" stroke="#5f6368" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 11v1a7 7 0 0 1-14 0v-1" stroke="#5f6368" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 19v3" stroke="#5f6368" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="suggestions" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
+
+    </form>
+
+    <div class="actions" role="group" aria-label="Search actions">
+      <button class="btn" type="button" id="btnLucky">I'm Feeling Curious</button>
+      <button class="btn primary" type="submit" formMethod="GET" formAction="https://www.google.com/search" id="btnSearch">Google Search</button>
+    </div>
+
+    <div class="footer" aria-hidden="false">
+      <div>Country: Rwanda</div>
+      <div>About • Privacy • Terms</div>
+    </div>
+
+  </main>
+
+  <script>
+    // ===== Professional, accessible, well-documented JS =====
+    // This script adds keyboard navigation for suggestions, a small local-suggestion engine
+    // and a simple "I'm Feeling Curious" button that opens a curated page.
+
+    (function(){
+      const input = document.getElementById('q');
+      const sugg = document.getElementById('suggestions');
+      const btnLucky = document.getElementById('btnLucky');
+
+      // A lightweight suggestion list. In production, you would request suggestions from a server.
+      const SAMPLE_SUGGESTIONS = [
+        'weather in Kigali',
+        'Rwanda news',
+        'how to make a website',
+        'python tutorial',
+        'best restaurants in Kigali',
+        'javascript array methods',
+        'satellite images of Earth',
+        'World Bank Rwanda projects',
+        'how to start a business in Rwanda'
+      ];
+
+      let visible = false;
+      let selectedIndex = -1;
+
+      function renderSuggestions(filtered){
+        sugg.innerHTML = '';
+        if(!filtered.length){
+          sugg.classList.remove('open');
+          visible = false;
+          return;
+        }
+        const frag = document.createDocumentFragment();
+        filtered.forEach((text, idx) => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.setAttribute('role','option');
+          div.setAttribute('data-index', idx);
+          div.tabIndex = -1;
+          div.textContent = text;
+          div.addEventListener('click', () => chooseSuggestion(text));
+          div.addEventListener('mouseover', () => setSelected(idx));
+          frag.appendChild(div);
+        });
+        sugg.appendChild(frag);
+        sugg.classList.add('open');
+        visible = true;
+      }
+
+      function setSelected(idx){
+        const items = sugg.querySelectorAll('.suggestion-item');
+        items.forEach((el,i)=>{
+          el.setAttribute('aria-selected', i===idx ? 'true' : 'false');
+        });
+        selectedIndex = idx;
+      }
+
+      function chooseSuggestion(text){
+        input.value = text;
+        // optionally submit the form automatically
+        // input.closest('form').submit();
+        closeSuggestions();
+        input.focus();
+      }
+
+      function closeSuggestions(){
+        sugg.classList.remove('open');
+        visible = false;
+        selectedIndex = -1;
+      }
+
+      // Filter suggestions locally for demo purposes
+      input.addEventListener('input', (e)=>{
+        const q = e.target.value.trim().toLowerCase();
+        if(!q){ closeSuggestions(); return; }
+        const filtered = SAMPLE_SUGGESTIONS.filter(s => s.toLowerCase().includes(q)).slice(0,8);
+        renderSuggestions(filtered);
+      });
+
+      // Keyboard support: ArrowDown/Up, Enter, Escape
+      input.addEventListener('keydown', (e)=>{
+        if(!visible && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
+          // open suggestions if possible
+          const filtered = SAMPLE_SUGGESTIONS.filter(s => s.toLowerCase().includes(input.value.toLowerCase())).slice(0,8);
+          if(filtered.length){ renderSuggestions(filtered); setSelected(0); }
+          e.preventDefault();
+          return;
+        }
+
+        if(visible){
+          const items = sugg.querySelectorAll('.suggestion-item');
+          if(e.key === 'ArrowDown'){
+            const next = Math.min((selectedIndex + 1) || 0, items.length -1);
+            setSelected(next);
+            items[next].scrollIntoView({block:'nearest'});
+            e.preventDefault();
+          } else if(e.key === 'ArrowUp'){
+            const prev = Math.max((selectedIndex -1) || 0, 0);
+            setSelected(prev);
+            items[prev].scrollIntoView({block:'nearest'});
+            e.preventDefault();
+          } else if(e.key === 'Enter'){
+            if(selectedIndex >= 0){
+              chooseSuggestion(items[selectedIndex].textContent);
+              e.preventDefault();
+            }
+            // otherwise allow form submit
+          } else if(e.key === 'Escape'){
+            closeSuggestions();
+            e.preventDefault();
+          }
+        }
+      });
+
+      // click-away to close suggestions
+      document.addEventListener('click', (ev)=>{
+        if(!ev.target.closest('.search-panel')) closeSuggestions();
+      });
+
+      // Make "I'm Feeling Curious" open a random curated page (safe demo)
+      btnLucky.addEventListener('click', ()=>{
+        const pages = [
+          'https://en.wikipedia.org/wiki/Rwanda',
+          'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+          'https://www.kaggle.com/',
+          'https://www.freecodecamp.org/',
+          'https://www.nationalgeographic.com/'
+        ];
+        const random = pages[Math.floor(Math.random()*pages.length)];
+        window.open(random, '_blank', 'noopener');
+      });
+
+      // Progressive enhancement hint: if browser supports 'search' type, it improves UX on mobile
+
+      // Accessibility helpers: screen-reader-only text style
+      const style = document.createElement('style');
+      style.textContent = ".sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}";
+      document.head.appendChild(style);
+
+    })();
+  </script>
+
+</body>
+</html>
